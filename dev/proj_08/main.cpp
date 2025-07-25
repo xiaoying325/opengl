@@ -1,8 +1,11 @@
 ﻿#include <windows.h>
-#include <stdio.h>
+
 #include "glew.h"
 #include "Glm/glm.hpp"
 #include "Glm/ext.hpp"
+#include "misc.h"
+#include "model.h"
+
 
 #pragma comment(lib,"opengl32.lib")
 #pragma comment(lib,"glew32.lib")
@@ -12,12 +15,12 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 
-struct  Vertex
-{
-	float pos[3];//xyz
-	float color[4];//RGAB
-};
-
+//struct  Vertex
+//{
+//	float pos[3];//xyz
+//	float color[4];//RGAB
+//};
+//
 
 LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -33,22 +36,7 @@ LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 }
 
 
-char* LoadFileContent(const char*path) {
-	FILE* pFile = fopen(path, "rb"); // rb read binary 格式去读取
-	if (pFile)
-	{
-		fseek(pFile, 0, SEEK_END); // 把文件指针移动到文件末尾
-		int nLen = ftell(pFile);// 这个文件有多大啊
-		char* buffer = new char[nLen + 1];//创建一个这样大小的buffer数组，这里为什么加1  因为我们要多写入一个\0, “Hellow” H e l l o \0
-		rewind(pFile);// 把文件指针再次移动到文件开头
-		fread(buffer, nLen, 1, pFile);//开始读取内容
-		buffer[nLen] = '\0';//读取完成之后，我们还要在末尾加一个\0
-		fclose(pFile);//读完完成关闭文件句柄
-		return buffer;
-	}
-	fclose(pFile);
-	return nullptr;
-}
+
 
 
 
@@ -62,6 +50,18 @@ GLuint CreateGPUProgram(const char* vsShaderPath, const char* fsShaderPath) {
 	// 要从磁盘上把我们写好的shader源码读取进来
 	const char* vsCode = LoadFileContent(vsShaderPath);
 	const char* fsCode = LoadFileContent(fsShaderPath);
+
+
+	//editbin /subsystem:console "$(TargetPath)"
+
+
+	std::cout << "vsShader: " << vsShader << std::endl;
+	std::cout << "vsCode: " << (vsCode ? vsCode : "nullptr") << std::endl;
+
+
+	std::cout << "fsShader: " << fsShader << std::endl;
+	std::cout << "fsCode: " << (fsCode ? fsCode : "nullptr") << std::endl;
+
 
 	//把读取到的GLSL源码上传到GPU
 	glShaderSource(vsShader, 1, &vsCode, nullptr);
@@ -174,7 +174,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	glewInit(); // 这是必须的
 
 	// 创建两个GPU能够识别并使用的着色器程序
-	GLuint  program = CreateGPUProgram("vs.shader","fs.shader");
+	GLuint  program = CreateGPUProgram("res/shader/vs.shader","res/shader/fs.shader");
 
 	// 上面这一步我们已经完成GPU程序创建
 	GLint posLocation, colorLocation, MLocation, VLocation, PLocation;
@@ -190,54 +190,54 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//顶点数据结构
 
 	// 这是不是第一个顶点？
-	Vertex vertex[3];
-	vertex[0].pos[0] = 0;   //0
-	vertex[0].pos[1] = 0;
-	vertex[0].pos[2] = -100.0f;
+	//Vertex vertex[3];
+	//vertex[0].pos[0] = 0;   //0
+	//vertex[0].pos[1] = 0;
+	//vertex[0].pos[2] = -100.0f;
 
-	vertex[0].color[0] = 1.0f;
-	vertex[0].color[1] = 1.0f;
-	vertex[0].color[2] = 1.0f;
-	vertex[0].color[3] = 1.0f;
-
-
-	// 这是不是第二个顶点？
-
-	vertex[1].pos[0] = 10;    //1
-	vertex[1].pos[1] = 0;
-	vertex[1].pos[2] = -100.0f;
-
-	vertex[1].color[0] = 1.0f;
-	vertex[1].color[1] = 1.0f;
-	vertex[1].color[2] = 1.0f;
-	vertex[1].color[3] = 1.0f;
+	//vertex[0].color[0] = 1.0f;
+	//vertex[0].color[1] = 1.0f;
+	//vertex[0].color[2] = 1.0f;
+	//vertex[0].color[3] = 1.0f;
 
 
-	// 这是不是第三个顶点？
+	//// 这是不是第二个顶点？
 
-	vertex[2].pos[0] = 0;
-	vertex[2].pos[1] = 10;
-	vertex[2].pos[2] = -100.0f; //2
+	//vertex[1].pos[0] = 10;    //1
+	//vertex[1].pos[1] = 0;
+	//vertex[1].pos[2] = -100.0f;
 
-	vertex[2].color[0] = 1.0f;
-	vertex[2].color[1] = 1.0f;
-	vertex[2].color[2] = 1.0f;
-	vertex[2].color[3] = 1.0f;
+	//vertex[1].color[0] = 1.0f;
+	//vertex[1].color[1] = 1.0f;
+	//vertex[1].color[2] = 1.0f;
+	//vertex[1].color[3] = 1.0f;
+
+
+	//// 这是不是第三个顶点？
+
+	//vertex[2].pos[0] = 0;
+	//vertex[2].pos[1] = 10;
+	//vertex[2].pos[2] = -100.0f; //2
+
+	//vertex[2].color[0] = 1.0f;
+	//vertex[2].color[1] = 1.0f;
+	//vertex[2].color[2] = 1.0f;
+	//vertex[2].color[3] = 1.0f;
 
 
 	// 使用vbo
-	GLuint vbo;
-	// 创建缓冲对象ID
-	glGenBuffers(1, &vbo);
+	//GLuint vbo;
+	//// 创建缓冲对象ID
+	//glGenBuffers(1, &vbo);
 
-	// 绑定缓冲到目标中
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	//// 绑定缓冲到目标中
+	//glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	//分配显存并上传数据到现存
-	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 3, vertex, GL_STATIC_DRAW);
+	////分配显存并上传数据到现存
+	//glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 3, vertex, GL_STATIC_DRAW);
 
-	// 解绑缓冲区
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//// 解绑缓冲区
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	//???为什么要使用vbo？
 	//为了节省内存以及性能
@@ -293,17 +293,51 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	*/
 
 
-	unsigned int indexes[] = { 0,1,2 };
+	//unsigned int indexes[] = { 0,1,2 };
 
-	GLuint ibo;
-	glGenBuffers(1, &ibo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	//GLuint vbo = CreateBufferObject(GL_ARRAY_BUFFER, sizeof(Vertex) * 3, GL_STATIC_DRAW, vertex);
+	//GLuint ibo = CreateBufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 3, GL_STATIC_DRAW, indexes);
 
-	//分配显存并上传数据到现存
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 3, indexes, GL_STATIC_DRAW);
 
-	// 解绑缓冲区
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	//GLuint ibo;
+	//glGenBuffers(1, &ibo);
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+	////分配显存并上传数据到现存
+	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 3, indexes, GL_STATIC_DRAW);
+
+	//// 解绑缓冲区
+	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+
+
+
+
+	/*
+	
+	要绘制模型，我们该怎么办呢？
+	1.是不是要加载模型？
+	2.加载完是不是解析模型的数据？
+	3.解析完，我们是不是要按照之前说的知识点，把解析之后的模型数据，如何组成VBO IBO 以及如何调用OPENGL进行绘制？
+
+
+	
+	*/
+
+
+
+	unsigned int* indexes = nullptr;
+	int vertexCount = 0, indexCount = 0;
+	VertexData* vertexes = LoadObjModel("res/model/Quad.obj", &indexes, vertexCount, indexCount);
+
+
+	printf("LoadObjModel Success!!!!!!!!!!!:%s\n", vertexes);
+
+
+	GLuint vbo = CreateBufferObject(GL_ARRAY_BUFFER, sizeof(VertexData) * 3, GL_STATIC_DRAW, vertexes);
+	GLuint ibo = CreateBufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 3, GL_STATIC_DRAW, indexes);
 
 
 
@@ -351,6 +385,8 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		//接入每帧opengl的绘制逻辑
 		glClear(GL_COLOR_BUFFER_BIT); //使用背景色清除颜色缓冲
 		glUseProgram(program);
+
+
 		// 把三个矩阵进行赋值
 
 		glUniformMatrix4fv(MLocation, 1, GL_FALSE, identity);
@@ -368,27 +404,31 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		//
 
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		//接下来我们从vbo中读取数据
-		//  glEnableVertexAttribArray(posLocation);  它是一种规则，什么规则？告诉opengl，从vbo中解析顶点数据的规则，我们可以看到它是Array
-		glEnableVertexAttribArray(posLocation);
-		// 这句话的意思是说，从偏移0开始，每隔sizeof（Vertext）字节数据开始，取3个float 作为位置属性
-		glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),(void*)0); //下面告诉你了，如何解析vbo中传递进来的所有顶点数据
-		glEnableVertexAttribArray(colorLocation);
-		glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float)*3));
+		//glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		////接下来我们从vbo中读取数据
+		////  glEnableVertexAttribArray(posLocation);  它是一种规则，什么规则？告诉opengl，从vbo中解析顶点数据的规则，我们可以看到它是Array
+		//glEnableVertexAttribArray(posLocation);
+		//// 这句话的意思是说，从偏移0开始，每隔sizeof（Vertext）字节数据开始，取3个float 作为位置属性
+		//glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),(void*)0); //下面告诉你了，如何解析vbo中传递进来的所有顶点数据
+		//glEnableVertexAttribArray(colorLocation);
+		//glVertexAttribPointer(colorLocation, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(float)*3));
 
 
 
-		//解绑当前opengl中绑定的vbo对象
-		glBindBuffer(GL_ARRAY_BUFFER, 0); //这一帧我们用完了解绑当前帧 之前绑定vbo数据
-		//调用绘制指令 ,这种是没有使用IBO的绘制方法
-		//glDrawArrays(GL_TRIANGLES, 0, 3);
+		////解绑当前opengl中绑定的vbo对象
+		//glBindBuffer(GL_ARRAY_BUFFER, 0); //这一帧我们用完了解绑当前帧 之前绑定vbo数据
+		////调用绘制指令 ,这种是没有使用IBO的绘制方法
+		////glDrawArrays(GL_TRIANGLES, 0, 3);
 
-		// 使用IBO的绘制方法
+		//// 使用IBO的绘制方法
 
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		//glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+
+
+
 
 
 
