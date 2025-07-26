@@ -18,6 +18,48 @@ struct  Vertex
 	float color[4];//RGAB
 };
 
+// 全局变量字体列表基址
+GLuint fontBase = 0;
+
+
+// 初始化字体显示，生成OpenGL位图字体列表
+void InitFont(HDC dc) {
+	HFONT font = CreateFont(
+		-24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+		ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
+		ANTIALIASED_QUALITY, FF_DONTCARE | DEFAULT_PITCH,
+		L"Arial");
+	SelectObject(dc, font);
+
+	fontBase = glGenLists(96);
+	wglUseFontBitmaps(dc, 32, 96, fontBase);
+}
+
+
+// 简单文本绘制函数，参数 x,y 是窗口左下角起点坐标
+void RenderText(float x, float y, const char* text) {
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	// 设正交投影，坐标系左下角(0,0)，右上角(800,600)
+	glOrtho(0, 800, 0, 600, -1, 1);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	// 设置光栅位置，y轴从下往上增加，注意y是距离底部距离
+	glRasterPos2f(x, y);
+
+	glListBase(fontBase - 32);
+	glCallLists((GLsizei)strlen(text), GL_UNSIGNED_BYTE, text);
+
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+}
+
 
 LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -173,6 +215,10 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	// 初始化glew环境
 	glewInit(); // 这是必须的
 
+
+	// 初始化字体显示
+	InitFont(dc);
+
 	// 创建两个GPU能够识别并使用的着色器程序
 	GLuint  program = CreateGPUProgram("vs.shader","fs.shader");
 
@@ -267,6 +313,12 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//定义一个消息
 	MSG msg;
 
+	// 帧率计算变量
+	DWORD lastTime = GetTickCount();
+	int frameCount = 0;
+	float fps = 0.0f;
+
+
 	//定义一个死循环，用来抓取消息（游戏引擎的主循环） 1s估计能刷66多帧
 	while (true)
 	{
@@ -324,6 +376,34 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		glBindBuffer(GL_ARRAY_BUFFER, 0); //这一帧我们用完了解绑当前帧 之前绑定vbo数据
 		glUseProgram(0);
 		
+
+		// 计算FPS
+		static DWORD lastTime = GetTickCount();
+		static int frameCount = 0;
+		static float fps = 0.0f;
+
+		frameCount++;
+		DWORD currentTime = GetTickCount();
+		DWORD delta = currentTime - lastTime;
+		if (delta >= 1000) {
+			fps = frameCount * 1000.0f / delta; // frameCount / (delta/1000)
+			frameCount = 0;
+			lastTime = currentTime;
+		}
+
+		// 准备显示文字信息
+		char info[128];
+		int vertexCount = 3;
+		int triangleCount = vertexCount / 3;
+		sprintf(info, "FPS: %.2f  Vertices: %d  Triangles: %d", fps, vertexCount, triangleCount);
+
+		// 关闭深度测试、纹理等，设置字体颜色
+		glDisable(GL_DEPTH_TEST);
+		glColor3f(1.0f, 1.0f, 0.0f);
+
+		// 左下角绘制，注意Y轴从底部向上
+		RenderText(10.0f, 10.0f, info);
+
 
 
 
