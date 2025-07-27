@@ -225,10 +225,11 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	GLuint  program = CreateGPUProgram("res/shader/vs.shader","res/shader/fs.shader");
 
 	// 上面这一步我们已经完成GPU程序创建
-	GLint posLocation, colorLocation, MLocation, VLocation, PLocation;
+	GLint posLocation, texcoordLocation,normalLocation,MLocation, VLocation, PLocation;
 	// ？如何从着色器中拿到这些变量呢？
 	posLocation = glGetAttribLocation(program, "pos");
-	colorLocation = glGetAttribLocation(program, "color");
+	texcoordLocation = glGetAttribLocation(program, "texcoord");
+	normalLocation = glGetAttribLocation(program, "normal");
 
 	MLocation = glGetUniformLocation(program, "M");
 	VLocation = glGetUniformLocation(program, "V");
@@ -379,7 +380,10 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	unsigned int* indexes = nullptr;
 	int vertexCount = 0, indexCount = 0;
 	VertexData* vertexes = LoadObjModel("res/model/Quad.obj", &indexes, vertexCount, indexCount);
-
+	if (vertexes == nullptr)
+	{
+		printf("LoadOBjModel Fail\n");
+	}
 
 	printf("LoadObjModel Success!!!!!!!!!!!:%s\n", vertexes);
 
@@ -387,7 +391,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	GLuint vbo = CreateBufferObject(GL_ARRAY_BUFFER, sizeof(VertexData) * 3, GL_STATIC_DRAW, vertexes);
 	GLuint ibo = CreateBufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 3, GL_STATIC_DRAW, indexes);
 
-
+	printf("vertex count %d index count %d\n", vertexCount, indexCount);
 
 	// 指定下我们清屏时所使用的颜色
 	glClearColor(0.1, 0.4, 0.6, 1.0);
@@ -407,7 +411,11 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		0,0,0,1
 	};
 
+	glm::mat4 model = glm::translate(0.0f, 0.0f, -8.0f);
 	glm::mat4 projection = glm::perspective(45.0f, 800.0f / 600.0f, 0.1f, 1000.0f);
+
+
+
 
 
 	//定义一个消息
@@ -443,7 +451,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		// 把三个矩阵进行赋值
 
-		glUniformMatrix4fv(MLocation, 1, GL_FALSE, identity);
+		glUniformMatrix4fv(MLocation, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(VLocation, 1, GL_FALSE, identity);
 		glUniformMatrix4fv(PLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -483,8 +491,21 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 
+		// 模型的那一陀数据已经被我们解析成了IBO和VBO
+		//接下来我们就开始画画呗
+	
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glEnableVertexAttribArray(posLocation);
+		glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+		glEnableVertexAttribArray(texcoordLocation);
+		glVertexAttribPointer(texcoordLocation, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(sizeof(float) * 3));
+		glEnableVertexAttribArray(normalLocation);
+		glVertexAttribPointer(normalLocation, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(sizeof(float) * 5));
 
-
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 
 		// 调用shader是默认不变的
@@ -492,27 +513,27 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 		//计算帧率和计算每一帧绘制的定点数以及三角形数目
-		frameCount++;
-		DWORD currentTime = GetTickCount();
-		if (currentTime - lastTime >= 1000) {
-			fps = frameCount * 1000.0f / (currentTime - lastTime);
-			frameCount = 0;
-			lastTime = currentTime;
-		}
+		//frameCount++;
+		//DWORD currentTime = GetTickCount();
+		//if (currentTime - lastTime >= 1000) {
+		//	fps = frameCount * 1000.0f / (currentTime - lastTime);
+		//	frameCount = 0;
+		//	lastTime = currentTime;
+		//}
 
-		//绘制文字信息
-		char info[128];
-		int vertextCount = 3;
-		int triangleCount = vertextCount / 3;
-		sprintf(info, "FPS: %.2f  Vertices: %d  Triangles: %d", fps, vertextCount, triangleCount);
-		// 沪指的HUDUi，所以我们要关闭深度测试
-		glDisable(GL_DEPTH_TEST);
-		glColor3f(1.0f, 1.0f, 1.0f);
+		////绘制文字信息
+		//char info[128];
+		//int vertextCount = 3;
+		//int triangleCount = vertextCount / 3;
+		//sprintf(info, "FPS: %.2f  Vertices: %d  Triangles: %d", fps, vertextCount, triangleCount);
+		//// 沪指的HUDUi，所以我们要关闭深度测试
+		//glDisable(GL_DEPTH_TEST);
+		//glColor3f(1.0f, 1.0f, 1.0f);
 
-		//左下角绘制
-		RenderText(10.0f, 10.0f, info);
-		glEnable(GL_DEPTH_TEST);
-		
+		////左下角绘制
+		//RenderText(10.0f, 10.0f, info);
+		//glEnable(GL_DEPTH_TEST);
+		//
 
 
 

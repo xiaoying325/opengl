@@ -195,7 +195,7 @@ VertexData* LoadObjModel(const char* filePath, unsigned int** indexes, int& vert
 		memcpy(vertexes[i].texcoord, texcoords[vertices[i].texcoordIndex].v, sizeof(float) * 2);
 		memcpy(vertexes[i].normal, normals[vertices[i].normalIndex].v, sizeof(float) * 3);
 	}
-
+	printf("face count %u\n", objIndexes.size() / 3);
 	delete[] fileContent;  // ÊÍ·ÅÎÄ¼þ»º´æ
 	return vertexes;
 

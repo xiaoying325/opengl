@@ -1,5 +1,6 @@
 attribute vec3 pos;
-attribute vec4 color;
+attribute vec2 texcoord;
+attribute vec3 normal;
 
 uniform mat4 M;
 uniform mat4 V;
@@ -9,7 +10,6 @@ varying vec4 V_Color;
 
 
 void main(){
-    V_Color = color;
     // 我们一个3d世界的点，转化到屏幕设备上的坐标经理了哪些流程呢？
     // 模型矩阵M 模型空间----》世界空间
     // 视图矩阵 V 世界空间----》视图空间，摄像机空间
