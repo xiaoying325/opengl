@@ -20,16 +20,32 @@ VertexData* LoadObjModel(const char* filePath, unsigned int** indexes, int& vert
 	printf("Obj Load Success\n%s\n", fileContent);
 
 
-
 	// 第二步，我们要解析了
 	struct  VertexInfo
 	{
 		float v[3];
 	};
 
+
+	//定义一个存储解析出来的面的结构体，用来干啥呢？
+	//用来标识每个面的每个顶点使用了哪些数据，我们已知有pos，texcoord normal
+	// v/t/n ----> postionIndex /texcoordIndex /normalIndex
+	struct  VertextDefine
+	{
+		int positionIndex;
+		int texcoordIndex;
+		int normalIndex;
+	};
+
+
 	std::vector<VertexInfo> positions;//我们要解析的坐标数据
 	std::vector<VertexInfo> texcoords;//我们要解析的纹理坐标数据
 	std::vector<VertexInfo> normals;//我们要解析的法线坐标数据
+
+
+	// 解析出的顶点数据
+	std::vector<VertextDefine> vertices;
+	std::vector<unsigned int >objIndexes;// IBO
 
 	// 怎么解？可以用stringstream解析文件,使用stringsre创建了一个字符串流ssObjFile，把fileContent的内容也就是Obj的内容，全部传了进去，这样
 	// 方便那我们后续解流操作
@@ -85,12 +101,102 @@ VertexData* LoadObjModel(const char* filePath, unsigned int** indexes, int& vert
 			// 面数据，目前只是输出
 			printf("[f] %s\n", line.c_str());
 			// TODO: 解析 f -> 索引数组
+			// 这里我们只解三角形面
+			// 第一步 去掉f
+			ssOneLine >> temp; //f 1/1/1 2/2/2 3/3/3  ---> 1/1/1 2/2/2 3/3/3
+			std::string vertexStr;
+
+			for (int i = 0; i < 3; i++) {
+				ssOneLine >> vertexStr;
+				size_t pos = vertexStr.find_first_of("/");// 1
+				std::string postionIndexStr = vertexStr.substr(0, pos);// 截取的终点不包含pos
+
+				// 找到第二个/的索引位置
+				size_t pos2 = vertexStr.find_first_of("/", pos + 1);
+				std::string texcoordIndexStr = vertexStr.substr(pos + 1, pos2 - pos - 1); //pos2 在索引=3的位置， 截取的长度是1
+				std::string normalIndexStr = vertexStr.substr(pos2 + 1, vertexStr.length() - pos2 - 1);
+
+				//把顶点的数据从obj文本中解析出来，但是这里有个问题，就是这个解析出来的index需要转换下
+				// 这里为什么要转换，我刚一直也描述过了
+				// 顶点数组，postions【0】 positons【1】 positons[2]
+				// Obj文件中 f 1/2/3  --->其实像访问的是，postions[0] texcoord[1] normal[2]
+				VertextDefine vd;
+				vd.positionIndex = atoi(postionIndexStr.c_str()) - 1; //atoi 转成一个int类型 原先是字符串1，转成int类型1 -1；
+				vd.texcoordIndex = atoi(texcoordIndexStr.c_str()) - 1;
+				vd.normalIndex = atoi(normalIndexStr.c_str()) - 1;
+
+				//判断下我们顶点数组中是否已经保存了我们解析出来的这个顶点，允许复用，可能存储在重复的顶点，如果重复的我么你就服用
+				int nCurrentIndex = -1;
+				size_t nCurrentVerticeCount = vertices.size();
+				for (size_t j = 0; j < nCurrentVerticeCount; j++)
+				{
+					if (vertices[j].positionIndex == vd.positionIndex &&
+						vertices[j].texcoordIndex == vd.texcoordIndex &&
+						vertices[j].normalIndex == vd.normalIndex)
+					{
+						nCurrentIndex = j;
+						break;
+					}
+				}
+
+
+				/*
+					索引0 --》（0，0，0）
+					索引1--》 （1，1，1）
+
+					（2，2，2）
+
+				*/
+				if (nCurrentIndex == -1) {
+					nCurrentIndex = vertices.size(); //2
+					vertices.push_back(vd);
+				}
+
+				//可以把顶点的索引存入到IBO中
+				/*
+				f 1/1/1 2/2/2 3/3/3
+				f 3/3/3 2/2/2 4/4/4
+				6个顶点，但是其中是有重读的，为什么之所以定义下面这两个东西，就是i为了优化
+				
+				std::vector<VertextDefine> vertices;//VBO
+				std::vector<unsigned int >objIndexes;// IBO
+
+				vertextes里面经过我们上面去重逻辑之后的顶点数据为
+				索引 0 -> (1,1,1)
+				索引 1 -> (2,2,2)
+				索引 2 -> (3,3,3)
+				索引 3 -> (4,4,4)
+
+				再看下IBO的数据
+				objIndexes = [0,1,2,2,1,3] //构成的两个三角形面
+
+
+				*/
+				objIndexes.push_back(nCurrentIndex);
+
+			}
 		}
+	}
 
 
+
+	//返回下IBO和VBO
+	indexCount = (int)objIndexes.size();
+	*indexes = new unsigned int[indexCount];
+	for (int i = 0; i < indexCount; i++) {
+		(*indexes)[i] = objIndexes[i];
+	}
+
+	//构成VBO
+	vertexCount = (int)vertices.size();
+	VertexData* vertexes = new VertexData[vertexCount];
+	for (int i = 0; i < vertexCount; ++i) {
+		memcpy(vertexes[i].position, positions[vertices[i].positionIndex].v, sizeof(float) * 3);
+		memcpy(vertexes[i].texcoord, texcoords[vertices[i].texcoordIndex].v, sizeof(float) * 2);
+		memcpy(vertexes[i].normal, normals[vertices[i].normalIndex].v, sizeof(float) * 3);
 	}
 
 	delete[] fileContent;  // 释放文件缓存
-	return nullptr;
+	return vertexes;
 
 }
