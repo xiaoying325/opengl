@@ -59,7 +59,7 @@ GLuint CreateGPUProgram(const char* vsShaderPath, const char* fsShaderPath) {
 	const char* fsCode = LoadFileContent(fsShaderPath);
 
 	//把读取到的GLSL源码上传到GPU
-	glShaderSou; rce(vsShader, 1, &vsCode, nullptr);
+	glShaderSource(vsShader, 1, &vsCode, nullptr);
 	glShaderSource(fsShader, 1, &fsCode, nullptr);
 
 	//编译shader
@@ -213,7 +213,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 3, vertex, GL_STATIC_DRAW);
 
 	// 解绑缓冲区
-	glBindBuffer(GL_ARRAY_BUFFER,0)；
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	//???为什么要使用vbo？
 	//为了节省内存以及性能
