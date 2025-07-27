@@ -15,6 +15,51 @@
 #define _CRT_SECURE_NO_WARNINGS
 
 
+
+//定义一个显示列表的基址
+GLuint fontBase = 0;
+
+
+// 提供一个绘制文本内容的函数
+void InitFont(HDC dc) {
+	HFONT font = CreateFont(
+		-24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+		ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
+		ANTIALIASED_QUALITY, FF_DONTCARE | DEFAULT_PITCH,
+		L"Arial");
+	SelectObject(dc, font);
+	fontBase = glGenLists(96);
+	wglUseFontBitmaps(dc, 32, 96, fontBase);
+
+}
+
+
+// 定义i一个绘制字体的函数，绘制以open左下角为起点
+void RenderText(float x, float y, const char* text) {
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	// 设正交投影，坐标系左下角(0,0)，右上角(800,600)
+	glOrtho(0, 800, 0, 600, -1, 1);
+
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+
+	// 设置光栅位置，y轴从下往上增加，注意y是距离底部距离
+	glRasterPos2f(x, y);
+
+	glListBase(fontBase - 32);
+	glCallLists((GLsizei)strlen(text), GL_UNSIGNED_BYTE, text);
+
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+}
+
+
+
 //struct  Vertex
 //{
 //	float pos[3];//xyz
@@ -172,6 +217,9 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	// 初始化glew环境
 	glewInit(); // 这是必须的
+
+	//初始化字体
+	InitFont(dc);
 
 	// 创建两个GPU能够识别并使用的着色器程序
 	GLuint  program = CreateGPUProgram("res/shader/vs.shader","res/shader/fs.shader");
@@ -365,6 +413,12 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//定义一个消息
 	MSG msg;
 
+	//计算帧率变量
+	DWORD lastTime = GetTickCount();
+	int frameCount = 0;
+	float fps = 0.0f;
+
+
 	//定义一个死循环，用来抓取消息（游戏引擎的主循环） 1s估计能刷66多帧
 	while (true)
 	{
@@ -435,7 +489,31 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		// 调用shader是默认不变的
 		glUseProgram(0);
+
+
+		//计算帧率和计算每一帧绘制的定点数以及三角形数目
+		frameCount++;
+		DWORD currentTime = GetTickCount();
+		if (currentTime - lastTime >= 1000) {
+			fps = frameCount * 1000.0f / (currentTime - lastTime);
+			frameCount = 0;
+			lastTime = currentTime;
+		}
+
+		//绘制文字信息
+		char info[128];
+		int vertextCount = 3;
+		int triangleCount = vertextCount / 3;
+		sprintf(info, "FPS: %.2f  Vertices: %d  Triangles: %d", fps, vertextCount, triangleCount);
+		// 沪指的HUDUi，所以我们要关闭深度测试
+		glDisable(GL_DEPTH_TEST);
+		glColor3f(1.0f, 1.0f, 1.0f);
+
+		//左下角绘制
+		RenderText(10.0f, 10.0f, info);
+		glEnable(GL_DEPTH_TEST);
 		
+
 
 
 
