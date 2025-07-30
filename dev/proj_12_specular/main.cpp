@@ -221,7 +221,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	InitFont(dc);
 
 	// 创建两个GPU能够识别并使用的着色器程序
-	GLuint  program = CreateGPUProgram("res/shader/light.vs","res/shader/light.fs");
+	GLuint  program = CreateGPUProgram("res/shader/specular.vs","res/shader/specular.fs");
 
 	// 上面这一步我们已经完成GPU程序创建
 	GLint posLocation, texcoordLocation,normalLocation,MLocation, VLocation, PLocation,NMLocation; //定义法线矩阵的变量
@@ -252,14 +252,14 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	printf("vertex count %d index count %d\n", vertexCount, indexCount);
 
-	// 指定下我们清屏时所使用的颜色,蓝色清理屏幕
+	// 指定下我们清屏时所使用的颜色，使用黑色来清除颜色缓冲区
 	glClearColor(0.0f,0.0f,0.0f,1.0f);
-	glEnable(GL_DEPTH_TEST);
 
 
 	ShowWindow(hwnd, SW_SHOW);
 	UpdateWindow(hwnd);
 
+	glEnable(GL_DEPTH_TEST); //开启深度测试，
 
 	float identity[] = {
 		1,0,0,0,
@@ -269,9 +269,9 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	};
 
 	glm::mat4 model = glm::translate(0.0f, -0.5f, -4.0f) * glm::rotate(-90.0f, 0.0f, 1.0f, 0.0f) * glm::scale(0.01f, 0.01f, 0.01f);
+	//glm::mat4 model = glm::translate(0.0f, -0.5f, -4.0f);
 	glm::mat4 projection = glm::perspective(45.0f, 800.0f / 600.0f, 0.1f, 1000.0f);
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
-
 
 
 
@@ -295,7 +295,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DispatchMessage(&msg);
 		}
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //使用背景色清除颜色缓冲
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); //使用背景色清除颜色缓冲 !!!!如果开启了深度测试，比如在每一帧绘制子花钱，清理深度缓冲区
 		glUseProgram(program);
 
 		//矩阵赋值
