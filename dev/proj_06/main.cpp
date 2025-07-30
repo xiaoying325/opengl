@@ -245,10 +245,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	vertex[0].color[1] = 1.0f;
 	vertex[0].color[2] = 1.0f;
 	vertex[0].color[3] = 1.0f;
-
-
 	// 这是不是第二个顶点？
-
 	vertex[1].pos[0] = 10;
 	vertex[1].pos[1] = 0;
 	vertex[1].pos[2] = -100.0f;
@@ -257,10 +254,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	vertex[1].color[1] = 1.0f;
 	vertex[1].color[2] = 1.0f;
 	vertex[1].color[3] = 1.0f;
-
-
 	// 这是不是第三个顶点？
-
 	vertex[2].pos[0] = 0;
 	vertex[2].pos[1] = 10;
 	vertex[2].pos[2] = -100.0f;
@@ -279,7 +273,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	// 绑定缓冲到目标中
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	//分配显存并上传数据到现存
+	//分配顶点需要的现存大小，并上传数据到现存
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 3, vertex, GL_STATIC_DRAW);
 
 	// 解绑缓冲区
@@ -356,6 +350,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		//
 
+		// 每帧告诉openg。我要绑定这个缓冲区的数据进行操作
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		//接下来我们从vbo中读取数据
 		//  glEnableVertexAttribArray(posLocation);  它是一种规则，什么规则？告诉opengl，从vbo中解析顶点数据的规则，我们可以看到它是Array
@@ -374,6 +369,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 		//解绑当前opengl中绑定的vbo对象
 		glBindBuffer(GL_ARRAY_BUFFER, 0); //这一帧我们用完了解绑当前帧 之前绑定vbo数据
+
 		glUseProgram(0);
 		
 

@@ -379,7 +379,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	unsigned int* indexes = nullptr;
 	int vertexCount = 0, indexCount = 0;
-	VertexData* vertexes = LoadObjModel("res/model/Sphere.obj", &indexes, vertexCount, indexCount);
+	VertexData* vertexes = LoadObjModel("res/model/niutou.obj", &indexes, vertexCount, indexCount);
 	if (vertexes == nullptr)
 	{
 		printf("LoadOBjModel Fail\n");
@@ -411,7 +411,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		0,0,0,1
 	};
 
-	glm::mat4 model = glm::translate(0.0f, 0.0f, -3.0f);
+	glm::mat4 model = glm::translate(0.0f, 0.0f, -3.0f) * glm::rotate(-45.0f, 0.0f, 1.0f, 0.0f) * glm::scale(0.8f, 0.8f, 0.8f);;
 	glm::mat4 projection = glm::perspective(45.0f, 800.0f / 600.0f, 0.1f, 1000.0f);
 
 
