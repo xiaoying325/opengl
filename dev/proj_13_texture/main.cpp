@@ -124,6 +124,12 @@ GLuint CreateGPUProgram(const char* vsShaderPath, const char* fsShaderPath) {
 		glGetShaderInfoLog(vsShader, 512, NULL, infoLog);
 		MessageBoxA(NULL, infoLog, "Vertex Shader Compile Error", MB_OK | MB_ICONERROR);
 	}
+	// 检查 fsShader 编译错误
+	glGetShaderiv(fsShader, GL_COMPILE_STATUS, &Success);
+	if (!Success) {
+		glGetShaderInfoLog(fsShader, 512, NULL, infoLog);
+		MessageBoxA(NULL, infoLog, "Fragment Shader Compile Error", MB_OK | MB_ICONERROR);
+	}
 
 
 
@@ -133,6 +139,14 @@ GLuint CreateGPUProgram(const char* vsShaderPath, const char* fsShaderPath) {
 	glAttachShader(program, fsShader);
 
 	glLinkProgram(program);
+
+
+	// 检查 program 链接错误
+	glGetProgramiv(program, GL_LINK_STATUS, &Success);
+	if (!Success) {
+		glGetProgramInfoLog(program, 512, NULL, infoLog);
+		MessageBoxA(NULL, infoLog, "Program Link Error", MB_OK | MB_ICONERROR);
+	}
 
 	//删除
 	glDetachShader(program, vsShader);
@@ -310,8 +324,9 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		glUniformMatrix4fv(NMLocation, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
 
-		glBindBuffer(GL_TEXTURE_2D, mainTexture); //表示我接下来要使用这个纹理进行绘制
-		glUniform1i(textureLocation, 0);
+		glActiveTexture(GL_TEXTURE0);//显示激活纹理单元0号，为默认都是激活的
+		glBindTexture(GL_TEXTURE_2D, mainTexture); //表示我接下来要使用这个纹理进行绘制
+		glUniform1i(textureLocation, 0); //给shader的祝文里字段赋值  0号纹理单元
 
 	
 		//绑定VBO和给着色器变量赋值

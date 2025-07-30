@@ -95,7 +95,7 @@ GLuint CreateTextureFromFile(const char* imagePath)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //线性 ,GL_NEAREST 最近邻采样
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	//没有minMap
+	//没有minMapy
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pixelData);
 	glBindTexture(GL_TEXTURE_2D, 0);
