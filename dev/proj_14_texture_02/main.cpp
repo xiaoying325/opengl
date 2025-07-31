@@ -23,7 +23,7 @@ GLuint fontBase = 0;
 // 提供一个绘制文本内容的函数
 void InitFont(HDC dc) {
 	HFONT font = CreateFont(
-		-24, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
+		-18, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
 		ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
 		ANTIALIASED_QUALITY, FF_DONTCARE | DEFAULT_PITCH,
 		L"Arial");
@@ -235,7 +235,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	InitFont(dc);
 
 	// 创建两个GPU能够识别并使用的着色器程序
-	GLuint  program = CreateGPUProgram("res/shader/specular.vs","res/shader/specular.fs");
+	GLuint  program = CreateGPUProgram("res/shader/specularTexture.vs","res/shader/specularTexture.fs");
 
 	// 上面这一步我们已经完成GPU程序创建
 	GLint posLocation, texcoordLocation,normalLocation,MLocation, VLocation, PLocation,NMLocation,textureLocation; //定义法线矩阵的变量
@@ -253,7 +253,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	unsigned int* indexes = nullptr;
 	int vertexCount = 0, indexCount = 0;
-	VertexData* vertexes = LoadObjModel("res/model/niutou.obj", &indexes, vertexCount, indexCount);
+	VertexData* vertexes = LoadObjModel("res/model/Sphere.obj", &indexes, vertexCount, indexCount);
 	if (vertexes == nullptr)
 	{
 		printf("LoadOBjModel Fail\n");
@@ -265,14 +265,16 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	GLuint vbo = CreateBufferObject(GL_ARRAY_BUFFER, sizeof(VertexData) * vertexCount, GL_STATIC_DRAW, vertexes);
 	GLuint ibo = CreateBufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indexCount, GL_STATIC_DRAW, indexes);
 	//加载纹理bo
-	GLuint mainTexture = CreateTextureFromFile("res/image/niutou.bmp");
+	//GLuint mainTexture = CreateTextureFromFile("res/image/niutou.bmp");
+	GLuint mainTexture = CreateTextureFromFile("res/image/earth.bmp");
 
 
 
 	printf("vertex count %d index count %d\n", vertexCount, indexCount);
 
 	// 指定下我们清屏时所使用的颜色，使用黑色来清除颜色缓冲区
-	glClearColor(0.0f,0.0f,0.0f,1.0f);
+	//glClearColor(0.0f,0.0f,0.0f,1.0f);
+	glClearColor(0.1, 0.4, 0.6, 1.0); //蓝色
 
 
 	ShowWindow(hwnd, SW_SHOW);
@@ -287,8 +289,8 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		0,0,0,1
 	};
 
-	glm::mat4 model = glm::translate(0.0f, -0.5f, -4.0f) * glm::rotate(-90.0f, 0.0f, 1.0f, 0.0f) * glm::scale(0.01f, 0.01f, 0.01f);
-	//glm::mat4 model = glm::translate(0.0f, -0.5f, -4.0f);
+	//glm::mat4 model = glm::translate(0.0f, -0.5f, -4.0f) * glm::rotate(-90.0f, 0.0f, 1.0f, 0.0f) * glm::scale(0.01f, 0.01f, 0.01f);
+	glm::mat4 model = glm::translate(0.0f, 0.0f, -4.0f);
 	glm::mat4 projection = glm::perspective(45.0f, 800.0f / 600.0f, 0.1f, 1000.0f);
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
 
@@ -297,6 +299,12 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	//定义一个消息
 	MSG msg;
 
+	//计算帧率变量
+	DWORD lastTime = GetTickCount();
+	int frameCount = 0;
+	float fps = 0.0f;
+
+	float angle = 0.0f;
 
 	//定义一个死循环，用来抓取消息（游戏引擎的主循环） 1s估计能刷66多帧
 	while (true)
@@ -314,9 +322,18 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DispatchMessage(&msg);
 		}
 
+
+
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); //使用背景色清除颜色缓冲 !!!!如果开启了深度测试，比如在每一帧绘制子花钱，清理深度缓冲区
 		glUseProgram(program);
 
+		angle += 0.04f;
+		if (angle > 360.0f)
+		{
+			angle = 0.0f;
+		}
+
+		model = glm::translate(0.0f, 0.0f, -4.0f) * glm::rotate(angle, 0.0f, 1.0f, 0.0f);
 		//矩阵赋值
 		glUniformMatrix4fv(MLocation, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(VLocation, 1, GL_FALSE, identity);
@@ -346,6 +363,33 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		//解绑着色器
 		glUseProgram(0);
+
+
+
+
+		//计算帧率和计算每一帧绘制的定点数以及三角形数目
+		frameCount++;
+		DWORD currentTime = GetTickCount();
+		if (currentTime - lastTime >= 1000) {
+			fps = frameCount * 1000.0f / (currentTime - lastTime);
+			frameCount = 0;
+			lastTime = currentTime;
+		}
+
+		//绘制文字信息
+		char info[128];
+		int vertextCount = vertexCount;
+		int triangleCount = vertextCount / 3;
+		sprintf(info, "FPS: %.2f  Vertices: %d   Indexes: %d  Triangles: %d", fps, vertextCount, indexCount, triangleCount);
+		// 沪指的HUDUi，所以我们要关闭深度测试
+		glDisable(GL_DEPTH_TEST);
+		glColor3f(1.0f, 1.0f, 1.0f);
+
+		//左下角绘制
+		RenderText(10.0f, 10.0f, info);
+		glEnable(GL_DEPTH_TEST);
+		
+
 
 		//交换缓冲区
 		SwapBuffers(dc);

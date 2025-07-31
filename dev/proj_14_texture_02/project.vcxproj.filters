@@ -33,4 +33,30 @@
       <Filter>源文件</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="res\shader\light.vs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\specular.fs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\specular.vs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\vs.shader">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\fs.shader">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\light.fs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\specularTexture.fs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\specularTexture.vs">
+      <Filter>源文件</Filter>
+    </None>
+  </ItemGroup>
 </Project>

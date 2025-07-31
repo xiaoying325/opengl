@@ -151,6 +151,16 @@
     <ClInclude Include="misc.h" />
     <ClInclude Include="model.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="res\shader\fs.shader" />
+    <None Include="res\shader\light.fs" />
+    <None Include="res\shader\light.vs" />
+    <None Include="res\shader\specular.fs" />
+    <None Include="res\shader\specular.vs" />
+    <None Include="res\shader\specularTexture.fs" />
+    <None Include="res\shader\specularTexture.vs" />
+    <None Include="res\shader\vs.shader" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
