@@ -327,13 +327,14 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); //使用背景色清除颜色缓冲 !!!!如果开启了深度测试，比如在每一帧绘制子花钱，清理深度缓冲区
 		glUseProgram(program);
 
-		angle += 0.04f;
+		angle += 0.01f;
 		if (angle > 360.0f)
 		{
 			angle = 0.0f;
 		}
 
 		model = glm::translate(0.0f, 0.0f, -4.0f) * glm::rotate(angle, 0.0f, 1.0f, 0.0f);
+		normalMatrix = glm::inverseTranspose(model); //模型矩阵变化了，那对应的法线矩阵肯定也要变化啊！！！
 		//矩阵赋值
 		glUniformMatrix4fv(MLocation, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(VLocation, 1, GL_FALSE, identity);
