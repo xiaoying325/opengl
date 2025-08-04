@@ -103,7 +103,7 @@ GLuint CreateTextureFromFile(const char* imagePath) {
 	int pixelDataSize = 0;
 
 	GLenum srcFormat = GL_RGB; //初始化默认纹理类型为RGB
-	if (*((unsigned short*)imgData) != 0x4D42) {
+	if (*((unsigned short*)imgData) == 0x4D42) {
 		// 表示查看前两个字节 
 		pixelData = DecodeBMPData(imgData, width, height);
 	}
