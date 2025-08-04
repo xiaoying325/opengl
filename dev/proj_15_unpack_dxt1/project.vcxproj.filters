@@ -58,5 +58,11 @@
     <None Include="res\shader\specularTexture.vs">
       <Filter>源文件</Filter>
     </None>
+    <None Include="res\shader\ui.fs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\ui.vs">
+      <Filter>源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

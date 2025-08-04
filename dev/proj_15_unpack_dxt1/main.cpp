@@ -235,7 +235,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	InitFont(dc);
 
 	// 创建两个GPU能够识别并使用的着色器程序
-	GLuint  program = CreateGPUProgram("res/shader/specularTexture.vs","res/shader/specularTexture.fs");
+	GLuint  program = CreateGPUProgram("res/shader/ui.vs","res/shader/ui.fs");
 
 	// 上面这一步我们已经完成GPU程序创建
 	GLint posLocation, texcoordLocation,normalLocation,MLocation, VLocation, PLocation,NMLocation,textureLocation; //定义法线矩阵的变量
@@ -253,7 +253,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	unsigned int* indexes = nullptr;
 	int vertexCount = 0, indexCount = 0;
-	VertexData* vertexes = LoadObjModel("res/model/Sphere.obj", &indexes, vertexCount, indexCount);
+	VertexData* vertexes = LoadObjModel("res/model/Quad.obj", &indexes, vertexCount, indexCount);
 	if (vertexes == nullptr)
 	{
 		printf("LoadOBjModel Fail\n");
@@ -333,7 +333,8 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			angle = 0.0f;
 		}
 
-		model = glm::translate(0.0f, 0.0f, -4.0f) * glm::rotate(angle, 0.0f, 1.0f, 0.0f);
+		//model = glm::translate(0.0f, 0.0f, -4.0f) * glm::rotate(angle, 0.0f, 1.0f, 0.0f);
+		model = glm::translate(0.0f, 0.0f, -4.0f);
 		normalMatrix = glm::inverseTranspose(model); //模型矩阵变化了，那对应的法线矩阵肯定也要变化啊！！！
 		//矩阵赋值
 		glUniformMatrix4fv(MLocation, 1, GL_FALSE, glm::value_ptr(model));
