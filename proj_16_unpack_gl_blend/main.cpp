@@ -235,7 +235,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	InitFont(dc);
 
 	// 创建两个GPU能够识别并使用的着色器程序
-	GLuint  program = CreateGPUProgram("res/shader/specularTexture.vs","res/shader/specularTexture.fs");
+	GLuint  program = CreateGPUProgram("res/shader/ui.vs","res/shader/ui.fs");
 
 	// 上面这一步我们已经完成GPU程序创建
 	GLint posLocation, texcoordLocation,normalLocation,MLocation, VLocation, PLocation,NMLocation,textureLocation; //定义法线矩阵的变量
@@ -251,9 +251,11 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	textureLocation = glGetUniformLocation(program, "U_MainTexture"); 
 
 
+	//  0(R) 0(G) 0(B)  0(A) 
+
 	unsigned int* indexes = nullptr;
 	int vertexCount = 0, indexCount = 0;
-	VertexData* vertexes = LoadObjModel("res/model/Sphere.obj", &indexes, vertexCount, indexCount);
+	VertexData* vertexes = LoadObjModel("res/model/Quad.obj", &indexes, vertexCount, indexCount);
 	if (vertexes == nullptr)
 	{
 		printf("LoadOBjModel Fail\n");
@@ -295,6 +297,20 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
 
 
+	glEnable(GL_BLEND);//开启混合
+
+	// 表示你告知opengl 当源像素（当前要绘制的像素）要写入屏幕缓冲区时，如何跟已经存在的屏幕像素（也就是目标像素）及逆行颜色混合？
+	// SRC_COLOR*SRC_FACTOR + DST_COLOR* DST_FACTOR
+	//SRC_COLOR 就是你当前片段着色器输出的颜色，比如你当前片段着色器输出的是一个红色（1，0，0，0.5）；
+	// DST_COLOR 就是已经在颜色缓冲区中像素颜色，比如glClearColor(0.1, 0.4, 0.6, 1.0); //蓝色 我们这里一直使用的蓝色进行清屏，
+	//SRC_FACTOR = 我们下面的第一个参数GL_SRC_ALPHA
+	// DST_FACTOR = 我们下面的第二个参数GL_ONE_MINUS_SRC_ALPHA
+	//  SRC_FACTOR = GL_SRC_ALPHA
+	// DST_COLOR = GL_ONE_MINUS_SRC_ALPHA = 1-GL_SRC_ALPHA
+	//  SCR_COLOR * SCR_ALPHA + DST_COLOR*(1-SCR_ALPHA)
+	// （SCR_COLOR1，0，0，0.5）   DST_COLOR(0.1, 0.4, 0.6, 1.0)  这两个颜色值带入
+	// (1，0，0，0.5）* 0.5 + (0.1, 0.4, 0.6, 1.0)*(1-1.0) = ？？？？？最后算出的就是我们混合之后的颜色值
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // z这个起始i就是标准的Alpha混合公式
 
 	//定义一个消息
 	MSG msg;
@@ -333,7 +349,8 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			angle = 0.0f;
 		}
 
-		model = glm::translate(0.0f, 0.0f, -4.0f) * glm::rotate(angle, 0.0f, 1.0f, 0.0f);
+		//model = glm::translate(0.0f, 0.0f, -4.0f) * glm::rotate(angle, 0.0f, 1.0f, 0.0f);
+		model = glm::translate(0.0f, 0.0f, -4.0f);
 		normalMatrix = glm::inverseTranspose(model); //模型矩阵变化了，那对应的法线矩阵肯定也要变化啊！！！
 		//矩阵赋值
 		glUniformMatrix4fv(MLocation, 1, GL_FALSE, glm::value_ptr(model));
