@@ -266,7 +266,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	GLuint ibo = CreateBufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indexCount, GL_STATIC_DRAW, indexes);
 	//加载纹理bo
 	//GLuint mainTexture = CreateTextureFromFile("res/image/niutou.bmp");
-	GLuint mainTexture = CreateTextureFromFile("res/image/earth.bmp");
+	GLuint mainTexture = CreateTextureFromFile("res/image/150001.dds");
 
 
 
