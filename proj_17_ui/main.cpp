@@ -228,6 +228,20 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	HGLRC rc = wglCreateContext(dc);
 	wglMakeCurrent(dc, rc);
 
+
+	//定义我们视口大小的宽度和高度
+
+
+	// 用这个api可以获取u我们opengl 绘制区的真是大小
+	int width, height;
+	RECT rect;
+
+	GetClientRect(hwnd, &rect);
+	width = rect.right - rect.left;
+	height = rect.bottom - rect.top;
+
+	// 800, 600,   难道不是他的视口宽度和高度么？
+
 	// 初始化glew环境
 	glewInit(); // 这是必须的
 
@@ -264,18 +278,41 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	printf("LoadObjModel Success!!!!!!!!!!!:%s\n", vertexes);
 
 
+	float z = 8.0f;// z轴上的坐标
+	float halfFov = 22.5f;
+	float radianHalfFov = glm::radians(halfFov); //把角度转为弧度，计算你肯定要单位统一
+
+	// 三角函数中，转换成三角函数中 tan角 = 对边/邻边  求y对边 = tan角 * -z（？？？为什么是负数呢？因为我么z本身就是负，这里再加个负数不i据负负得正了吗）
+	float y = tan(radianHalfFov) * -z;
+	float x = y * (float)width / (float)height;
+
+	// xy已经求出来，那我们就设置下四个顶点的坐标呗
+
+	//left bottom
+	vertexes[0].position[0] = -x;
+	vertexes[0].position[1] = -y;
+	//right bottom
+	vertexes[1].position[0] = x;
+	vertexes[1].position[1] = -y;
+	//left top
+	vertexes[2].position[0] = -x;
+	vertexes[2].position[1] = y;
+	//right top
+	vertexes[3].position[0] = x;
+	vertexes[3].position[1] = y;
+
+
+
+
 	GLuint vbo = CreateBufferObject(GL_ARRAY_BUFFER, sizeof(VertexData) * vertexCount, GL_STATIC_DRAW, vertexes);
 	GLuint ibo = CreateBufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indexCount, GL_STATIC_DRAW, indexes);
 	//加载纹理bo
-	//GLuint mainTexture = CreateTextureFromFile("res/image/niutou.bmp");
-	GLuint mainTexture = CreateTextureFromFile("res/image/150001.dds");
+	GLuint mainTexture = CreateTextureFromFile("res/image/niutou.bmp");
+	//GLuint mainTexture = CreateTextureFromFile("res/image/150001.dds");
 
 
 
 	printf("vertex count %d index count %d\n", vertexCount, indexCount);
-
-	// 指定下我们清屏时所使用的颜色，使用黑色来清除颜色缓冲区
-	//glClearColor(0.0f,0.0f,0.0f,1.0f);
 	glClearColor(0.1, 0.4, 0.6, 1.0); //蓝色
 
 
@@ -291,44 +328,15 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		0,0,0,1
 	};
 
-	//glm::mat4 model = glm::translate(0.0f, -0.5f, -4.0f) * glm::rotate(-90.0f, 0.0f, 1.0f, 0.0f) * glm::scale(0.01f, 0.01f, 0.01f);
-	glm::mat4 model = glm::translate(0.0f, 0.0f, 0.0f);
-
-	//glm::mat4 model = glm::scale(100.0f, 100.0f, 1.0f);
-	glm::mat4 projection = glm::perspective(45.0f, 800.0f / 600.0f, 0.1f, 1000.0f); //透视投影矩阵
-	// 定义正交投影矩阵
-	//glm::mat4 uiMatrix = glm::ortho(-400.0f, 400.0f, -300.0f, 300.0f); 
-	 glm::mat4 uiMatrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
-
-	// 我们定义一个-400~400 ~300 ~ 300 大小的矩形盒子，水平方向供800哥像素
-	// 垂直方向上 供600个像素点
-
+	glm::mat4 model = glm::translate(0.0f, 0.0f, -8.0f); // 我们把模型推到摄像机前面-4的位置了
+	glm::mat4 projection = glm::perspective(45.0f, (float)width /(float)height, 0.1f, 1000.0f); //透视投影矩阵
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
 
-	// MVP矩阵变化，指的是，在3维世界中，一个物体，经理MVP矩阵变化，指的是它从模型空间，---》世界空间 模型变化 M
-	// 世界空间---》观察空间（摄像机） 观察变化 V
-	// 从摄像机的观察空间---》裁剪空间 投影变化P （正交投影。透视投影）
-	// 屏幕映射，从NDC中-1 1 坐标最终映射到屏幕上的像素坐标，  屏幕映射 这里处理的NDC
-
-	//UI内容的绘制 我们尽量使用正交举证
-
-
-
-
 	glEnable(GL_BLEND);//开启混合
-
-	// 表示你告知opengl 当源像素（当前要绘制的像素）要写入屏幕缓冲区时，如何跟已经存在的屏幕像素（也就是目标像素）及逆行颜色混合？
-	// SRC_COLOR*SRC_FACTOR + DST_COLOR* DST_FACTOR
-	//SRC_COLOR 就是你当前片段着色器输出的颜色，比如你当前片段着色器输出的是一个红色（1，0，0，0.5）；
-	// DST_COLOR 就是已经在颜色缓冲区中像素颜色，比如glClearColor(0.1, 0.4, 0.6, 1.0); //蓝色 我们这里一直使用的蓝色进行清屏，
-	//SRC_FACTOR = 我们下面的第一个参数GL_SRC_ALPHA
-	// DST_FACTOR = 我们下面的第二个参数GL_ONE_MINUS_SRC_ALPHA
-	//  SRC_FACTOR = GL_SRC_ALPHA
-	// DST_COLOR = GL_ONE_MINUS_SRC_ALPHA = 1-GL_SRC_ALPHA
-	//  SCR_COLOR * SCR_ALPHA + DST_COLOR*(1-SCR_ALPHA)
-	// （SCR_COLOR1，0，0，0.5）   DST_COLOR(0.1, 0.4, 0.6, 1.0)  这两个颜色值带入
-	// (1，0，0，0.5）* 0.5 + (0.1, 0.4, 0.6, 1.0)*(1-1.0) = ？？？？？最后算出的就是我们混合之后的颜色值
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // z这个起始i就是标准的Alpha混合公式
+
+	// 设置我们的视口大小
+	glViewport(0, 0, width, height);
 
 	//定义一个消息
 	MSG msg;
@@ -373,7 +381,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		//矩阵赋值
 		glUniformMatrix4fv(MLocation, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(VLocation, 1, GL_FALSE, identity);
-		glUniformMatrix4fv(PLocation, 1, GL_FALSE, glm::value_ptr(uiMatrix));
+		glUniformMatrix4fv(PLocation, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(NMLocation, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
 
