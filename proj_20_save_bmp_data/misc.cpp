@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include "glew.h"
 #include<string.h>
-
+#include <windows.h>
 
 
 GLuint CreateBufferObject(GLenum bufferType, GLsizeiptr size, GLenum usage, void* data /* = nullptr */)
@@ -44,6 +44,38 @@ char* LoadFileContent(const char* path)
 	}
 	fclose(pFile);
 	return nullptr;
+}
+
+
+void SaveImage(const char* imagePath, unsigned char* imgData, int width, int height)
+{
+	FILE* pFile = fopen(imagePath, "wb");
+	if (pFile)
+	{
+		BITMAPFILEHEADER bfh;
+		memset(&bfh, 0, sizeof(BITMAPFILEHEADER));
+		bfh.bfType = 0x4D42;
+		bfh.bfSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + width * height * 3;
+		bfh.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+		fwrite(&bfh, sizeof(BITMAPFILEHEADER), 1, pFile);
+
+		BITMAPINFOHEADER bih;
+		memset(&bih, 0, sizeof(BITMAPINFOHEADER));
+		bih.biWidth = width;
+		bih.biHeight = height;
+		bih.biBitCount = 24;
+		bih.biSize = sizeof(BITMAPINFOHEADER);
+		fwrite(&bih, sizeof(BITMAPINFOHEADER), 1, pFile);
+		unsigned char temp = 0;
+		for (int i = 0; i < width * height * 3; i += 3)
+		{
+			temp = imgData[i + 2];
+			imgData[i + 2] = imgData[i];
+			imgData[i] = temp;
+		}
+		fwrite(imgData, 1, width * height * 3, pFile);
+		fclose(pFile);
+	}
 }
 
 
@@ -144,6 +176,7 @@ GLuint CreateTextureFromFile(const char* imagePath) {
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+	SaveImage("res/image/save-test.bmp", pixelData, width, height);
 	delete imgData;
 	return texture;
 
