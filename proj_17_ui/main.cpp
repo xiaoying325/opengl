@@ -292,9 +292,27 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	};
 
 	//glm::mat4 model = glm::translate(0.0f, -0.5f, -4.0f) * glm::rotate(-90.0f, 0.0f, 1.0f, 0.0f) * glm::scale(0.01f, 0.01f, 0.01f);
-	glm::mat4 model = glm::translate(0.0f, 0.0f, -4.0f);
-	glm::mat4 projection = glm::perspective(45.0f, 800.0f / 600.0f, 0.1f, 1000.0f);
+	glm::mat4 model = glm::translate(0.0f, 0.0f, 0.0f);
+
+	//glm::mat4 model = glm::scale(100.0f, 100.0f, 1.0f);
+	glm::mat4 projection = glm::perspective(45.0f, 800.0f / 600.0f, 0.1f, 1000.0f); //透视投影矩阵
+	// 定义正交投影矩阵
+	//glm::mat4 uiMatrix = glm::ortho(-400.0f, 400.0f, -300.0f, 300.0f); 
+	 glm::mat4 uiMatrix = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
+
+	// 我们定义一个-400~400 ~300 ~ 300 大小的矩形盒子，水平方向供800哥像素
+	// 垂直方向上 供600个像素点
+
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
+
+	// MVP矩阵变化，指的是，在3维世界中，一个物体，经理MVP矩阵变化，指的是它从模型空间，---》世界空间 模型变化 M
+	// 世界空间---》观察空间（摄像机） 观察变化 V
+	// 从摄像机的观察空间---》裁剪空间 投影变化P （正交投影。透视投影）
+	// 屏幕映射，从NDC中-1 1 坐标最终映射到屏幕上的像素坐标，  屏幕映射 这里处理的NDC
+
+	//UI内容的绘制 我们尽量使用正交举证
+
+
 
 
 	glEnable(GL_BLEND);//开启混合
@@ -350,12 +368,12 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		}
 
 		//model = glm::translate(0.0f, 0.0f, -4.0f) * glm::rotate(angle, 0.0f, 1.0f, 0.0f);
-		model = glm::translate(0.0f, 0.0f, -4.0f);
-		normalMatrix = glm::inverseTranspose(model); //模型矩阵变化了，那对应的法线矩阵肯定也要变化啊！！！
+		//model = glm::translate(0.0f, 0.0f, -100.0f);
+		//normalMatrix = glm::inverseTranspose(model); //模型矩阵变化了，那对应的法线矩阵肯定也要变化啊！！！
 		//矩阵赋值
 		glUniformMatrix4fv(MLocation, 1, GL_FALSE, glm::value_ptr(model));
 		glUniformMatrix4fv(VLocation, 1, GL_FALSE, identity);
-		glUniformMatrix4fv(PLocation, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(PLocation, 1, GL_FALSE, glm::value_ptr(uiMatrix));
 		glUniformMatrix4fv(NMLocation, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
 
