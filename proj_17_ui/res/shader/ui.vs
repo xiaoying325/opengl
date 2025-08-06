@@ -12,4 +12,5 @@ void main()
 {
 	V_Texcoord=vec2(texcoord.x,1.0-texcoord.y);//必须要翻转下，不然图象是倒的
     gl_Position=P*V*M*vec4(pos,1.0);
+	// gl_Position=vec4(pos,1.0);
 }

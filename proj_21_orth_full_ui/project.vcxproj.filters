@@ -64,5 +64,11 @@
     <None Include="res\shader\ui.vs">
       <Filter>源文件</Filter>
     </None>
+    <None Include="res\shader\ui_full.fs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\ui_full.vs">
+      <Filter>源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -161,6 +161,8 @@
     <None Include="res\shader\specularTexture.vs" />
     <None Include="res\shader\ui.fs" />
     <None Include="res\shader\ui.vs" />
+    <None Include="res\shader\ui_full.fs" />
+    <None Include="res\shader\ui_full.vs" />
     <None Include="res\shader\vs.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

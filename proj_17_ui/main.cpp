@@ -278,6 +278,8 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	printf("LoadObjModel Success!!!!!!!!!!!:%s\n", vertexes);
 
 
+	//当视角为 45°、摄像机看向 -Z 方向、相机位置在 0、模型在 z = -8 时，NDC 的 [-1,1] 范围实际映射成 View 空间（或模型空间）里的什么 XY 坐标？
+
 	float z = 8.0f;// z轴上的坐标
 	float halfFov = 22.5f;
 	float radianHalfFov = glm::radians(halfFov); //把角度转为弧度，计算你肯定要单位统一

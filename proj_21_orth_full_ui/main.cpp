@@ -280,13 +280,23 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	printf("LoadObjModel Success!!!!!!!!!!!:%s\n", vertexes);
 
-
+	////left bottom
+	//vertexes[0].position[0] = 0;
+	//vertexes[0].position[1] = 0;
+	////right bottom
+	//vertexes[1].position[0] =800;
+	//vertexes[1].position[1] = 0;
+	////left top
+	//vertexes[2].position[0] =0;
+	//vertexes[2].position[1] = 600;
+	////right top
+	//vertexes[3].position[0] = 800;
+	//vertexes[3].position[1] = 600;
 
 	GLuint vbo = CreateBufferObject(GL_ARRAY_BUFFER, sizeof(VertexData) * vertexCount, GL_STATIC_DRAW, vertexes);
 	GLuint ibo = CreateBufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indexCount, GL_STATIC_DRAW, indexes);
 	//加载纹理bo
 	GLuint mainTexture = CreateTextureFromFile("res/image/niutou.bmp");
-	//GLuint mainTexture = CreateTextureFromFile("res/image/150001.dds");
 
 
 
@@ -299,15 +309,15 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	glEnable(GL_DEPTH_TEST); //开启深度测试，
 
-	float identity[] = {
-		1,0,0,0,
-		0,1,0,0,
-		0,0,1,0,
-		0,0,0,1
-	};
 
-	glm::mat4 model = glm::translate(0.0f, 0.0f, -100.0f); // 我们把模型推到摄像机前面-4的位置了
-	glm::mat4 projection = glm::perspective(45.0f, (float)width /(float)height, 0.1f, 1000.0f); //透视投影矩阵
+	// 0 - 800 
+	// 0 - 600 
+	// quad的4个坐标
+
+
+	glm::mat4 model = glm::mat4(1.0f);   // 单位矩阵 // 我们把模型推到摄像机前面-4的位置了
+	glm::mat4 projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height, -1.0f, 1.0f);
+	glm::mat4 view = glm::mat4(1.0f);    // 不使用摄像机变换
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
 
 	glEnable(GL_BLEND);//开启混合
@@ -350,7 +360,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		//矩阵赋值
 		glUniformMatrix4fv(MLocation, 1, GL_FALSE, glm::value_ptr(model));
-		glUniformMatrix4fv(VLocation, 1, GL_FALSE, identity);
+		glUniformMatrix4fv(VLocation, 1, GL_FALSE, glm::value_ptr(view));
 		glUniformMatrix4fv(PLocation, 1, GL_FALSE, glm::value_ptr(projection));
 		glUniformMatrix4fv(NMLocation, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
