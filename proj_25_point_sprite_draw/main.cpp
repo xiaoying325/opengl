@@ -253,7 +253,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	InitFont(dc);
 
 	// 创建两个GPU能够识别并使用的着色器程序
-	GLuint  program = CreateGPUProgram("res/shader/ui_full.vs","res/shader/ui_full.fs");
+	GLuint  program = CreateGPUProgram("res/shader/point_sprite.vs","res/shader/point_sprite.fs");
 
 	// 上面这一步我们已经完成GPU程序创建
 	GLint posLocation, texcoordLocation,normalLocation,MLocation, VLocation, PLocation,NMLocation,textureLocation; //定义法线矩阵的变量
@@ -273,7 +273,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	t.Start();
 	unsigned int* indexes = nullptr;
 	int vertexCount = 0, indexCount = 0;
-	VertexData* vertexes = LoadObjModel("res/model/Quad.obj", &indexes, vertexCount, indexCount);
+	VertexData* vertexes = LoadObjModel("res/model/Sphere.obj", &indexes, vertexCount, indexCount);
 	if (vertexes == nullptr)
 	{
 		printf("LoadOBjModel Fail\n");
@@ -282,10 +282,14 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	printf("LoadObjModel Success!!!!!!!!!!!:%s\n", vertexes);
 
 
+	vertexes[0].position[0] = 0.0f;
+	vertexes[0].position[1] = 0.0f;
+
+
 	GLuint vbo = CreateBufferObject(GL_ARRAY_BUFFER, sizeof(VertexData) * vertexCount, GL_STATIC_DRAW, vertexes);
 	GLuint ibo = CreateBufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indexCount, GL_STATIC_DRAW, indexes);
 	//加载纹理bo
-	GLuint mainTexture = CreateTextureFromFile("res/image/niutou.bmp");
+	GLuint mainTexture = CreateTextureFromFile("res/image/camera.dds");
 
 
 
@@ -296,9 +300,13 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	UpdateWindow(hwnd);
 
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_POINT_SPRITE);
+	glEnable(GL_PROGRAM_POINT_SIZE);
 
-	glm::mat4 model = glm::mat4(1.0f);
-	glm::mat4 projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height, -1.0f, 1.0f);
+
+
+	glm::mat4 model = glm::translate(0.0f, 0.0f, -4.0f);
+	glm::mat4 projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
 
@@ -335,7 +343,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_POINTS, indexCount, GL_UNSIGNED_INT, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glUseProgram(0);
 	};
@@ -353,12 +361,9 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
-		glEnable(GL_SCISSOR_TEST);
-		glScissor(0, 0, width, 100);
+
+		// 绘制过程
 		draw();
-		glScissor(0, 150, width, 100);
-		draw();
-		glDisable(GL_SCISSOR_TEST);
 
 		//计算帧率和计算每一帧绘制的定点数以及三角形数目
 		frameCount++;

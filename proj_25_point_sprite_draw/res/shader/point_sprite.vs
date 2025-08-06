@@ -6,11 +6,8 @@ uniform mat4 M;
 uniform mat4 V;
 uniform mat4 P;
 
-varying vec2 V_Texcoord;
-
 void main()
 {
-	V_Texcoord=vec2(texcoord.x,texcoord.y);//必须要翻转下，不然图象是倒的
+	gl_PointSize=35.0; //璁剧疆鐐圭殑澶у皬
     gl_Position=P*V*M*vec4(pos,1.0);
-	//gl_Position=vec4(pos,1.0);
 }
