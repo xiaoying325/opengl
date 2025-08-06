@@ -244,7 +244,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	height = rect.bottom - rect.top;
 
 
-	// 800, 600,   难道不是他的视口宽度和高度么？
+	GL_CALL(glEnable(GL_LINEAR));
 
 	// 初始化glew环境
 	glewInit(); // 这是必须的
@@ -269,7 +269,6 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	textureLocation = glGetUniformLocation(program, "U_MainTexture"); 
 
 
-	//  0(R) 0(G) 0(B)  0(A) 
 	Timer t;
 	t.Start();
 	unsigned int* indexes = nullptr;
@@ -291,34 +290,24 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 	printf("vertex count %d index count %d\n", vertexCount, indexCount);
-	glClearColor(0.1, 0.4, 0.6, 1.0); //蓝色
-
+	glClearColor(0.1, 0.4, 0.6, 1.0);
 
 	ShowWindow(hwnd, SW_SHOW);
 	UpdateWindow(hwnd);
 
-	glEnable(GL_DEPTH_TEST); //开启深度测试，
-
-
-	// 0 - 800 
-	// 0 - 600 
-	// quad的4个坐标
-
+	glEnable(GL_DEPTH_TEST);
 
 	glm::mat4 model = glm::mat4(1.0f);
 	glm::mat4 projection = glm::ortho(0.0f, (float)width, 0.0f, (float)height, -1.0f, 1.0f);
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
 
-	glEnable(GL_BLEND);//开启混合
+	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	// 设置我们的视口大小
 	glViewport(0, 0, width, height);
 
-	//定义一个消息
 	MSG msg;
 
-	//计算帧率变量
 	DWORD lastTime = GetTickCount();
 	int frameCount = 0;
 	float fps = 0.0f;
@@ -351,23 +340,17 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		glUseProgram(0);
 	};
 
-	//定义一个死循环，用来抓取消息（游戏引擎的主循环） 1s估计能刷66多帧
 	while (true)
 	{
-		//如果消息来了
 		if (PeekMessage(&msg, NULL, NULL, NULL, PM_REMOVE))
 		{
-			//如果是退出消息，那就直接退出，跳出while
 			if (msg.message == WM_QUIT)
 			{
 				break;
 			}
-			//如果非退出消息，那就把消息转换一下，并底层派发出去
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
-
-
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
 		glEnable(GL_SCISSOR_TEST);
@@ -376,8 +359,6 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		glScissor(0, 150, width, 100);
 		draw();
 		glDisable(GL_SCISSOR_TEST);
-
-
 
 		//计算帧率和计算每一帧绘制的定点数以及三角形数目
 		frameCount++;
