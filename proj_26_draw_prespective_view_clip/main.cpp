@@ -61,13 +61,6 @@ void RenderText(float x, float y, const char* text) {
 
 
 
-//struct  Vertex
-//{
-//	float pos[3];//xyz
-//	float color[4];//RGAB
-//};
-//
-
 LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
