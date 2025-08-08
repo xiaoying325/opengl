@@ -27,6 +27,9 @@
     <ClCompile Include="timer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Frustum.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="model.h">
@@ -37,6 +40,9 @@
     </ClInclude>
     <ClInclude Include="timer.h">
       <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Frustum.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -80,6 +86,12 @@
       <Filter>源文件</Filter>
     </None>
     <None Include="res\shader\point_sprite.vs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\WhiteColor.fs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\WhiteColor.vs">
       <Filter>源文件</Filter>
     </None>
   </ItemGroup>

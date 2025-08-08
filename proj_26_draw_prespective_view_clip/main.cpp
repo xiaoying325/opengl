@@ -1,16 +1,17 @@
 ﻿#include <windows.h>
-
+#include <stdio.h>
 #include "glew.h"
-#include "Glm/glm.hpp"
-#include "Glm/ext.hpp"
 #include "misc.h"
 #include "model.h"
+#include "Glm/glm.hpp"
+#include "Glm/ext.hpp"
 #include "timer.h"
+#include "frustum.h"
 
 
 #pragma comment(lib,"opengl32.lib")
 #pragma comment(lib,"glew32.lib")
-
+#pragma comment(lib,"glu32.lib")
 
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -74,87 +75,6 @@ LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-
-
-
-
-
-
-// 创建着色器函数
-GLuint CreateGPUProgram(const char* vsShaderPath, const char* fsShaderPath) {
-	// 从磁盘上加载我们写好的着色器源码，并且创建为GPU可识别的着色器程序链接进去
-	GLuint vsShader = glCreateShader(GL_VERTEX_SHADER);
-	GLuint fsShader = glCreateShader(GL_FRAGMENT_SHADER);
-
-	// 要从磁盘上把我们写好的shader源码读取进来
-	const char* vsCode = LoadFileContent(vsShaderPath);
-	const char* fsCode = LoadFileContent(fsShaderPath);
-
-
-	//editbin /subsystem:console "$(TargetPath)"
-
-
-	std::cout << "vsShader: " << vsShader << std::endl;
-	std::cout << "vsCode: " << (vsCode ? vsCode : "nullptr") << std::endl;
-
-
-	std::cout << "fsShader: " << fsShader << std::endl;
-	std::cout << "fsCode: " << (fsCode ? fsCode : "nullptr") << std::endl;
-
-
-	//把读取到的GLSL源码上传到GPU
-	glShaderSource(vsShader, 1, &vsCode, nullptr);
-	glShaderSource(fsShader, 1, &fsCode, nullptr);
-
-	//编译shader
-	glCompileShader(vsShader);
-	glCompileShader(fsShader);
-
-
-	GLint Success;
-	char infoLog[512];
-	glGetShaderiv(vsShader, GL_COMPILE_STATUS, &Success);
-	if (!Success) {
-		glGetShaderInfoLog(vsShader, 512, NULL, infoLog);
-		MessageBoxA(NULL, infoLog, "Vertex Shader Compile Error", MB_OK | MB_ICONERROR);
-	}
-	// 检查 fsShader 编译错误
-	glGetShaderiv(fsShader, GL_COMPILE_STATUS, &Success);
-	if (!Success) {
-		glGetShaderInfoLog(fsShader, 512, NULL, infoLog);
-		MessageBoxA(NULL, infoLog, "Fragment Shader Compile Error", MB_OK | MB_ICONERROR);
-	}
-
-
-
-	//创建一个shader程序模板，并且链接
-	GLuint program = glCreateProgram();
-	glAttachShader(program, vsShader);
-	glAttachShader(program, fsShader);
-
-	glLinkProgram(program);
-
-
-	// 检查 program 链接错误
-	glGetProgramiv(program, GL_LINK_STATUS, &Success);
-	if (!Success) {
-		glGetProgramInfoLog(program, 512, NULL, infoLog);
-		MessageBoxA(NULL, infoLog, "Program Link Error", MB_OK | MB_ICONERROR);
-	}
-
-	//删除
-	glDetachShader(program, vsShader);
-	glDetachShader(program, fsShader);
-
-
-	glDeleteShader(vsShader);
-	glDeleteShader(fsShader);
-
-
-	return program;
-
-
-}
 
 
 INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
@@ -240,17 +160,13 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	GL_CALL(glEnable(GL_LINEAR));
 
 	// 初始化glew环境
-	glewInit(); // 这是必须的
+	glewInit();
 
 	//初始化字体
 	InitFont(dc);
 
-	// 创建两个GPU能够识别并使用的着色器程序
-	GLuint  program = CreateGPUProgram("res/shader/point_sprite.vs","res/shader/point_sprite.fs");
-
-	// 上面这一步我们已经完成GPU程序创建
-	GLint posLocation, texcoordLocation,normalLocation,MLocation, VLocation, PLocation,NMLocation,textureLocation; //定义法线矩阵的变量
-	// ？如何从着色器中拿到这些变量呢？
+	GLuint program = CreateGPUProgram("res/shader/point_sprite.vs", "res/shader/point_sprite.fs");
+	GLint posLocation, texcoordLocation, normalLocation, MLocation, VLocation, PLocation, NMLocation, textureLocation;
 	posLocation = glGetAttribLocation(program, "pos");
 	texcoordLocation = glGetAttribLocation(program, "texcoord");
 	normalLocation = glGetAttribLocation(program, "normal");
@@ -259,7 +175,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	VLocation = glGetUniformLocation(program, "V");
 	PLocation = glGetUniformLocation(program, "P");
 	NMLocation = glGetUniformLocation(program, "NM");
-	textureLocation = glGetUniformLocation(program, "U_MainTexture"); 
+	textureLocation = glGetUniformLocation(program, "U_MainTexture");
 
 
 	Timer t;
@@ -298,14 +214,22 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 
-	glm::mat4 model = glm::translate(0.0f, 0.0f, -4.0f);
-	glm::mat4 projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
+	glm::mat4 model = glm::translate(0.0f, 0.0f, -10.0f) * glm::rotate(-20.0f, 0.0f, 1.0f, 0.0f);;
+	glm::mat4 projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, -4.0f);
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
 
+
+	
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glViewport(0, 0, width, height);
+
+
+	Frustum frustum;
+	frustum.InitProgram();
+	frustum.InitPrespective(45.0f, (float)width / (float)height, 0.1f, -4.0f);
+
 
 	MSG msg;
 
@@ -324,7 +248,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		glUniformMatrix4fv(NMLocation, 1, GL_FALSE, glm::value_ptr(normalMatrix));
 
 		glBindTexture(GL_TEXTURE_2D, mainTexture);
-		glUniform1i(texcoordLocation, 0);
+		glUniform1i(textureLocation, 0);
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo);
 		glEnableVertexAttribArray(posLocation);
@@ -354,7 +278,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
-
+		frustum.Draw(glm::value_ptr(model), glm::value_ptr(view), glm::value_ptr(projection));
 		// 绘制过程
 		draw();
 

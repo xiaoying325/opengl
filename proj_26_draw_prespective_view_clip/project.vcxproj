@@ -143,12 +143,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Frustum.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="misc.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Frustum.h" />
     <ClInclude Include="misc.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="timer.h" />
@@ -168,6 +170,8 @@
     <None Include="res\shader\ui_full.fs" />
     <None Include="res\shader\ui_full.vs" />
     <None Include="res\shader\vs.shader" />
+    <None Include="res\shader\WhiteColor.fs" />
+    <None Include="res\shader\WhiteColor.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
