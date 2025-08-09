@@ -228,7 +228,8 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	Frustum frustum;
 	frustum.InitProgram();
-	frustum.InitPrespective(45.0f, (float)width / (float)height, 0.1f, -4.0f);
+	//frustum.InitPrespective(45.0f, (float)width / (float)height, 0.1f, -4.0f);
+	frustum.InitOrtho(-0.5f, 0.5f, -0.5f, 0.5f, 0.1f, 4.0f);
 
 
 	MSG msg;
@@ -280,7 +281,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
 		frustum.Draw(glm::value_ptr(model), glm::value_ptr(view), glm::value_ptr(projection));
 		// 绘制过程
-		draw();
+		//draw();
 
 		//计算帧率和计算每一帧绘制的定点数以及三角形数目
 		frameCount++;

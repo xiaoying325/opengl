@@ -370,9 +370,6 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	1.是不是要加载模型？
 	2.加载完是不是解析模型的数据？
 	3.解析完，我们是不是要按照之前说的知识点，把解析之后的模型数据，如何组成VBO IBO 以及如何调用OPENGL进行绘制？
-
-
-	
 	*/
 
 

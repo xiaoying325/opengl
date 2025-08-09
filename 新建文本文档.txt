@@ -1,5 +1,14 @@
-proj_13_texture  加载纹理贴图
-proj_14_texture_02 加载纹理贴图（二）
+proj_04 加载shader
+proj_06 使用VBO
+proj_07 使用VBO（二）
+proj_08 使用IBO，精简VBO索引数量数据
+proj_09 加载球模型
+proj_10 ambient光照模式下加载牛头人模型
+proj_10_ambient  演示环境光光照模型下的牛头人
+proj_11_diffuse 演示漫反射光照模型下的牛头人
+proj_12_specular 演示高光光照下的牛头人
+proj_13_texture  演示带有贴图的牛头人
+proj_14_texture_02 演示带有纹理贴图的地球（二）
 proj_15_unpack_dxt1  解析dxt1(dds)纹理贴图初步尝试
 proj_16_unpack_gl_blend glblend OpenGL是如何处理透明的像素的
 proj_17_ui 加载dds，完成UI绘制初步尝试
