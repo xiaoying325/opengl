@@ -157,6 +157,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shader\fs.shader" />
+    <None Include="res\shader\gpu_instancing.fs" />
+    <None Include="res\shader\gpu_instancing.vs" />
     <None Include="res\shader\light.fs" />
     <None Include="res\shader\light.vs" />
     <None Include="res\shader\point_sprite.fs" />
@@ -172,6 +174,9 @@
     <None Include="res\shader\vs.shader" />
     <None Include="res\shader\WhiteColor.fs" />
     <None Include="res\shader\WhiteColor.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\image\niutou.bmp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

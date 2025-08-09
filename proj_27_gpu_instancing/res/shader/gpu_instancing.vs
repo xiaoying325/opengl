@@ -1,22 +1,18 @@
-
 attribute vec3 pos;
 attribute vec2 texcoord;
 attribute vec3 normal;
-attribute vec3 offset;
 
 uniform mat4 M;
 uniform mat4 V;
 uniform mat4 P;
 uniform mat4 NM;
 
+varying vec4 V_Color;
 varying vec3 V_Normal;
-varying vec4 V_WorldPos;
-varying vec2 V_Texcoord;
 
 void main()
 {
-	V_Normal=mat3(NM)*normal;
-	V_WorldPos=M*vec4(pos,1.0)+vec4(offset,1.0);
-	V_Texcoord=texcoord;
-    gl_Position=P*V*V_WorldPos;
+    //把本地局部世界坐标中的法线坐标 也转换到世界空间中
+    V_Normal = mat3(NM) *normal; 
+    gl_Position=P*V*M*vec4(pos,1.0);
 }

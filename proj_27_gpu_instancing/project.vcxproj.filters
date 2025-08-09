@@ -94,5 +94,16 @@
     <None Include="res\shader\WhiteColor.vs">
       <Filter>源文件</Filter>
     </None>
+    <None Include="res\shader\gpu_instancing.fs">
+      <Filter>源文件</Filter>
+    </None>
+    <None Include="res\shader\gpu_instancing.vs">
+      <Filter>源文件</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\image\niutou.bmp">
+      <Filter>源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>

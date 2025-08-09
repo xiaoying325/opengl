@@ -182,23 +182,18 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	t.Start();
 	unsigned int* indexes = nullptr;
 	int vertexCount = 0, indexCount = 0;
-	VertexData* vertexes = LoadObjModel("res/model/Sphere.obj", &indexes, vertexCount, indexCount);
+	VertexData* vertexes = LoadObjModel("res/model/niutou.obj", &indexes, vertexCount, indexCount);
 	if (vertexes == nullptr)
 	{
 		printf("LoadOBjModel Fail\n");
 	}
 	printf("load model cost %d\n", t.GetPassedTime());
-	printf("LoadObjModel Success!!!!!!!!!!!:%s\n", vertexes);
-
-
-	vertexes[0].position[0] = 0.0f;
-	vertexes[0].position[1] = 0.0f;
 
 
 	GLuint vbo = CreateBufferObject(GL_ARRAY_BUFFER, sizeof(VertexData) * vertexCount, GL_STATIC_DRAW, vertexes);
 	GLuint ibo = CreateBufferObject(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indexCount, GL_STATIC_DRAW, indexes);
 	//加载纹理bo
-	GLuint mainTexture = CreateTextureFromFile("res/image/camera.dds");
+	GLuint mainTexture = CreateTextureFromFile("res/image/niutou.bmp");
 
 
 
@@ -214,8 +209,8 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 
-	glm::mat4 model = glm::translate(0.0f, 0.0f, -10.0f) * glm::rotate(-20.0f, 0.0f, 1.0f, 0.0f);;
-	glm::mat4 projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, -4.0f);
+	glm::mat4 model = glm::translate(0.0f, -0.5f, -4.0f) * glm::rotate(-90.0f, 0.0f, 1.0f, 0.0f) * glm::scale(0.01f, 0.01f, 0.01f);
+	glm::mat4 projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
 
@@ -224,12 +219,6 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glViewport(0, 0, width, height);
-
-
-	Frustum frustum;
-	frustum.InitProgram();
-	//frustum.InitPrespective(45.0f, (float)width / (float)height, 0.1f, -4.0f);
-	frustum.InitOrtho(-0.5f, 0.5f, -0.5f, 0.5f, 0.1f, 4.0f);
 
 
 	MSG msg;
@@ -261,7 +250,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glDrawElements(GL_POINTS, indexCount, GL_UNSIGNED_INT, 0);
+		glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0, 3);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glUseProgram(0);
 	};
@@ -279,7 +268,6 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
-		frustum.Draw(glm::value_ptr(model), glm::value_ptr(view), glm::value_ptr(projection));
 		// 绘制过程
 		draw();
 
