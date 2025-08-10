@@ -166,10 +166,11 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	InitFont(dc);
 
 	GLuint program = CreateGPUProgram("res/shader/gpu_instancing.vs", "res/shader/gpu_instancing.fs");
-	GLint posLocation, texcoordLocation, normalLocation, MLocation, VLocation, PLocation, NMLocation, textureLocation;
+	GLint posLocation, texcoordLocation, normalLocation, MLocation, VLocation, PLocation, NMLocation, textureLocation, offsetLocation;
 	posLocation = glGetAttribLocation(program, "pos");
 	texcoordLocation = glGetAttribLocation(program, "texcoord");
 	normalLocation = glGetAttribLocation(program, "normal");
+	offsetLocation = glGetAttribLocation(program, "offset");
 
 	MLocation = glGetUniformLocation(program, "M");
 	VLocation = glGetUniformLocation(program, "V");
@@ -209,7 +210,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 
-	glm::mat4 model = glm::translate(0.0f, -0.5f, -4.0f) * glm::rotate(-90.0f, 0.0f, 1.0f, 0.0f) * glm::scale(0.01f, 0.01f, 0.01f);
+	glm::mat4 model = glm::translate(0.0f, -0.5f, -10.0f) * glm::rotate(-90.0f, 0.0f, 1.0f, 0.0f) * glm::scale(0.01f, 0.01f, 0.01f);
 	glm::mat4 projection = glm::perspective(45.0f, (float)width / (float)height, 0.1f, 1000.0f);
 	glm::mat4 view = glm::mat4(1.0f);
 	glm::mat4 normalMatrix = glm::inverseTranspose(model);
@@ -227,6 +228,26 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	int frameCount = 0;
 	float fps = 0.0f;
 	float angle = 0.0f;
+
+
+	glm::vec3 positions[20];
+	int rows = 4;
+	int cols = 5;
+	float spacingX = 2.0f;
+	float spacingY = 2.0f;
+	float startX = -((cols - 1) * spacingX) / 2.0f; // 让X居中
+	float startY = ((rows - 1) * spacingY) / 2.0f;  // 让Y居中，注意Y轴向上
+
+	for (int i = 0; i < 20; i++) {
+		int row = i / cols;     // 当前行号 0~3
+		int col = i % cols;     // 当前列号 0~4
+		float x = startX + col * spacingX;
+		float y = startY - row * spacingY;  // Y往下递减
+		float z = -10.0f;  // 深度固定
+		positions[i] = glm::vec3(x, y, z);
+	}
+	GLuint offsetVBO = CreateBufferObject(GL_ARRAY_BUFFER, sizeof(float) * 3*20, GL_STATIC_DRAW, positions);
+
 
 
 	auto draw = [&]()->void
@@ -250,11 +271,13 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0, 3);
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 		glUseProgram(0);
 	};
 
+
+	//渲染主循环
 	while (true)
 	{
 		if (PeekMessage(&msg, NULL, NULL, NULL, PM_REMOVE))
@@ -267,9 +290,51 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 			DispatchMessage(&msg);
 		}
 
-		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); 
-		// 绘制过程
-		draw();
+		
+		glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT); //先擦除缓冲区，然后再重新绘制一帧的画面
+
+
+		
+		glUseProgram(program);//指定接下来的绘制操作使用哪个着色器程序
+		glUniformMatrix4fv(MLocation, 1, GL_FALSE, glm::value_ptr(model));
+		glUniformMatrix4fv(VLocation, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(PLocation, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(NMLocation, 1, GL_FALSE, glm::value_ptr(normalMatrix));
+
+		glUniformMatrix4fv(VLocation, 1, GL_FALSE, glm::value_ptr(view));
+		glUniformMatrix4fv(PLocation, 1, GL_FALSE, glm::value_ptr(projection));
+
+		
+		glBindTexture(GL_TEXTURE_2D, mainTexture);// 绑定纹理操作缓冲区
+		glUniform1i(textureLocation, 0);
+
+		
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);// 绑定VBO操作缓冲区
+		glEnableVertexAttribArray(posLocation);
+		glVertexAttribPointer(posLocation, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)0);
+		glEnableVertexAttribArray(texcoordLocation);
+		glVertexAttribPointer(texcoordLocation, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(sizeof(float) * 3));
+		glEnableVertexAttribArray(normalLocation);
+		glVertexAttribPointer(normalLocation, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)(sizeof(float) * 5));
+		glBindBuffer(GL_ARRAY_BUFFER, 0);// 解绑VBO操作缓冲区
+
+
+		
+		glBindBuffer(GL_ARRAY_BUFFER, offsetVBO);// 绑定顶点坐标偏移的VBO
+		glEnableVertexAttribArray(offsetLocation); //启用顶点属性数组offsetLocation,告诉opengl仓库管理员，这个属性我们要用上，它对应shader中的offset
+		glVertexAttribPointer(offsetLocation, 3, GL_FLOAT, GL_FALSE, sizeof(float)*3, (void*)0);
+		glBindBuffer(GL_ARRAY_BUFFER, 0); // / 解绑顶点坐标偏移的VBO
+
+		glVertexAttribDivisor(offsetLocation, 1);
+
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);// 绑定IBO操作缓冲区
+		glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0,20);// CPU通知GPU调用drawcall绘制指令
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);// 解绑IBO操作缓冲区
+		glUseProgram(0);// 解绑我们的当前绘制操作指定的着色器程序
+
+
+
 
 		//计算帧率和计算每一帧绘制的定点数以及三角形数目
 		frameCount++;
