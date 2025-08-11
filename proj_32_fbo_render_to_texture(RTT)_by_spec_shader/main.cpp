@@ -280,7 +280,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	// 四边形的顶点数据，必须要符合我们现有的shader的格式
 	float quadVertices[] = {
 		// pos           // texcoord 
-		-0.5f, -0.5f,  0, 0,
+		-1.0f, -1.0f,  0, 0,
 		 1.0f, -1.0f,  1, 0,
 		 1.0f,  1.0f,   1, 1,
 		-1.0f,  1.0f,   0, 1,
