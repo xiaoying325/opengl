@@ -379,7 +379,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		// 我们要告诉opengl解析来的内容绘制到FBO上， 不要绘制到屏幕帧缓冲了
 		glBindFramebuffer(GL_FRAMEBUFFER, fbo);//绑定我们的帧缓冲对象FBO，告诉opengl接下来的绘制操作都是到这个FBO上，而不是默认的屏幕缓冲
 		glViewport(0, 0, width, height); //这里设置视口大小 为FBO纹理尺寸的大小，
-		glClearColor(0.1, 0.4, 0.6, 1.0);// 清除颜色为红色，  
+		glClearColor(1.0, 0.4, 0.6, 1.0);// 清除颜色为红色，  
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		drawCommand(); //调用绘制，把那几个模型绘制
