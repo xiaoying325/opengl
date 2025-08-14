@@ -316,8 +316,8 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	glBindVertexArray(0); // 解绑VAO
 
 
-	GLuint screenProgram = CreateGPUProgram("res/shader/fbo.vs", "res/shader/fbo.fs");
-	GLuint screenTextureLocation = glGetUniformLocation(screenProgram, "screenTexture");
+	GLuint depthProgram = CreateGPUProgram("res/shader/fbo_depth.vs", "res/shader/fbo_depth.fs");
+	GLuint depthMapLocation = glGetUniformLocation(depthProgram, "depthMap");
 
 
 
@@ -402,11 +402,11 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// 使用屏幕四边形着色器  开始要绑定VAO进行quad的绘制了
-		glUseProgram(screenProgram);
+		glUseProgram(depthProgram);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, colorBuffer);  // FBO渲染的颜色纹理
-		glUniform1i(screenTextureLocation, 0);
+		glBindTexture(GL_TEXTURE_2D, depthBuffer);  // FBO渲染的颜色纹理
+		glUniform1i(depthMapLocation, 0);
 
 		glBindVertexArray(quadVAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
