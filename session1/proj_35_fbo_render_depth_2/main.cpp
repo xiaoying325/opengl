@@ -18,50 +18,6 @@
 
 
 
-//定义一个显示列表的基址
-GLuint fontBase = 0;
-
-
-// 提供一个绘制文本内容的函数
-void InitFont(HDC dc) {
-	HFONT font = CreateFont(
-		-18, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
-		ANSI_CHARSET, OUT_TT_PRECIS, CLIP_DEFAULT_PRECIS,
-		ANTIALIASED_QUALITY, FF_DONTCARE | DEFAULT_PITCH,
-		L"Arial");
-	SelectObject(dc, font);
-	fontBase = glGenLists(96);
-	wglUseFontBitmaps(dc, 32, 96, fontBase);
-
-}
-
-
-// 定义i一个绘制字体的函数，绘制以open左下角为起点
-void RenderText(float x, float y, const char* text) {
-	glMatrixMode(GL_PROJECTION);
-	glPushMatrix();
-	glLoadIdentity();
-	// 设正交投影，坐标系左下角(0,0)，右上角(800,600)
-	glOrtho(0, 800, 0, 600, -1, 1);
-
-	glMatrixMode(GL_MODELVIEW);
-	glPushMatrix();
-	glLoadIdentity();
-
-	// 设置光栅位置，y轴从下往上增加，注意y是距离底部距离
-	glRasterPos2f(x, y);
-
-	glListBase(fontBase - 32);
-	glCallLists((GLsizei)strlen(text), GL_UNSIGNED_BYTE, text);
-
-	glPopMatrix();
-	glMatrixMode(GL_PROJECTION);
-	glPopMatrix();
-	glMatrixMode(GL_MODELVIEW);
-}
-
-
-
 LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
@@ -106,6 +62,7 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	rect.right = 800;
 	rect.bottom = 600;
 	rect.top = 0;
+
 	AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, FALSE);
 
 	//如果注册成功了，那就开始创建窗口 调用CreateWindowEx函数
@@ -162,8 +119,6 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 	// 初始化glew环境
 	glewInit();
 
-	//初始化字体
-	InitFont(dc);
 
 	GLuint program = CreateGPUProgram("res/shader/gpu_subroutine.vs", "res/shader/gpu_subroutine.fs");
 	GLint posLocation, texcoordLocation, normalLocation, MLocation, VLocation, PLocation, NMLocation, textureLocation, offsetLocation, surfaceColorLocation;
@@ -189,6 +144,8 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	Timer t;
 	t.Start();
+
+
 	unsigned int* indexes = nullptr;
 	int vertexCount = 0, indexCount = 0;
 	VertexData* vertexes = LoadObjModel("res/model/niutou.obj", &indexes, vertexCount, indexCount);
@@ -247,11 +204,6 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 
 	MSG msg;
-
-	DWORD lastTime = GetTickCount();
-	int frameCount = 0;
-	float fps = 0.0f;
-	float angle = 0.0f;
 
 
 	glm::vec3 positions[3];
