@@ -1,76 +1,122 @@
 ﻿#include <windows.h>
+#include <gl/GL.h>
+#include <gl/GLU.h>
 
-
+#pragma comment(lib,"opengl32.lib")
+#pragma comment(lib,"glu32.lib")
 
 LRESULT CALLBACK GLWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
-	case WM_CLOSE://点击了关闭窗口的按钮
-		PostQuitMessage(0);//发一个WM_QUIT消息给程序
+	case WM_CLOSE:
+		PostQuitMessage(0);
 		break;
 	}
-
-	//window系统提供的，默认的用来处理消息的函数
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-
 INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpCmdLine, _In_ int nShowCmd)
 {
+	//register window
 	WNDCLASSEX wndclass;
 	wndclass.cbClsExtra = 0;
 	wndclass.cbSize = sizeof(WNDCLASSEX);
 	wndclass.cbWndExtra = 0;
 	wndclass.hbrBackground = NULL;
-	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);//给鼠标一个系统内置的图标
+	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndclass.hIcon = NULL;
 	wndclass.hIconSm = NULL;
 	wndclass.hInstance = hInstance;
-
-	//消息相应函数，例如鼠标、键盘对窗口进行了操作，如何响应？就是这个函数
 	wndclass.lpfnWndProc = GLWindowProc;
 	wndclass.lpszClassName = L"GLWindow";
 	wndclass.lpszMenuName = NULL;
-	wndclass.style = CS_VREDRAW | CS_HREDRAW; //水平重绘 垂直重绘
-
-	//上面窗口的基本参数已经构建完毕，开始注册这个窗口
+	wndclass.style = CS_VREDRAW | CS_HREDRAW;
 	ATOM atom = RegisterClassEx(&wndclass);
 	if (!atom)
 	{
-		return 0; //如果窗口没有注册成功，就直接退出程序
+		return 0;
 	}
-
-
-	//如果注册成功了，那就开始创建窗口 调用CreateWindowEx函数
+	//create window
 	HWND hwnd = CreateWindowEx(NULL, L"GLWindow", L"OpenGL Window", WS_OVERLAPPEDWINDOW,
-		100, 100, 640, 960, NULL, NULL, hInstance, NULL);
+		100, 100, 800, 600, NULL, NULL, hInstance, NULL);
+	//create opengl render context
+	HDC dc = GetDC(hwnd);
+	PIXELFORMATDESCRIPTOR pfd;
+	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
+	pfd.nVersion = 1;
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+	pfd.cColorBits = 32;
+	pfd.cDepthBits = 24;
+	pfd.cStencilBits = 8;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.iLayerType = PFD_MAIN_PLANE;
+	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
 
+	int pixelFormat = ChoosePixelFormat(dc, &pfd);
+	SetPixelFormat(dc, pixelFormat, &pfd);
 
+	HGLRC rc = wglCreateContext(dc);
+	wglMakeCurrent(dc, rc);//setup opengl context complete
+	//opengl init
+	glMatrixMode(GL_PROJECTION);//tell the gpu processer that i would select the projection matrix
+	gluPerspective(50.0f, 800.0f / 600.0f, 0.1f, 1000.0f);//set some values to projection matrix
+	glMatrixMode(GL_MODELVIEW);//tell .... model view matrix
+	glLoadIdentity();
 
+	glClearColor(0.1f, 0.4f, 0.6f, 1.0f);//set "clear color" for background
+	//show window
 	ShowWindow(hwnd, SW_SHOW);
 	UpdateWindow(hwnd);
+	glEnable(GL_CULL_FACE);
 
+	//init light
+	float blackColor[] = { 0.0f,0.0f,0.0f,1.0f };
+	float whiteColor[] = { 1.0f,1.0f,1.0f,1.0f };
+	float lightPos[] = { 0.0f,1.0f,0.0f,0.0f };//
+	glLightfv(GL_LIGHT0, GL_AMBIENT, whiteColor);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, whiteColor);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, whiteColor);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPos);//direction light,point,spot
 
-	//定义一个消息
+	float blackMat[] = { 0.0f,0.0f,0.0f,1.0f };
+	float ambientMat[] = { 0.1f,0.1f,0.1f,1.0f };
+	float diffuseMat[] = { 0.4f,0.4f,0.4f,1.0f };
+	float specularMat[] = { 0.9f,0.9f,0.9f,1.0f };
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambientMat);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuseMat);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specularMat);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	//front face : ccw -> counter clock wind 
 	MSG msg;
-
-	//定义一个死循环，用来抓取消息（游戏引擎的主循环） 1s估计能刷66多帧
 	while (true)
 	{
-		//如果消息来了
 		if (PeekMessage(&msg, NULL, NULL, NULL, PM_REMOVE))
 		{
-			//如果是退出消息，那就直接退出，跳出while
 			if (msg.message == WM_QUIT)
 			{
 				break;
 			}
-			//如果非退出消息，那就把消息转换一下，并底层派发出去
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
+		//draw scene
+		glLoadIdentity();
+		glClear(GL_COLOR_BUFFER_BIT);
+		glBegin(GL_TRIANGLES);//start to draw something
+		glNormal3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(-1.0f, -0.5f, -2.0f);
 
+		glNormal3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(1.0f, -0.5f, -2.0f);
+
+		glNormal3f(0.0f, 1.0f, 0.0f);
+		glVertex3f(0.0f, -0.5f, -10.0f);
+		glEnd();//end
+
+		//present scene
+		SwapBuffers(dc);
 	}
 
 	return 0;
