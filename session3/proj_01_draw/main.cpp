@@ -103,8 +103,10 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 		}
 		//draw scene
 		glLoadIdentity();
-		glClear(GL_COLOR_BUFFER_BIT);
-		glBegin(GL_TRIANGLES);//start to draw something
+		glClear(GL_COLOR_BUFFER_BIT); ///一样的清屏操作
+
+
+		glBegin(GL_TRIANGLES);// 开始画三角形
 		glNormal3f(0.0f, 1.0f, 0.0f);
 		glVertex3f(-1.0f, -0.5f, -2.0f);
 
@@ -113,10 +115,12 @@ INT WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		glNormal3f(0.0f, 1.0f, 0.0f);
 		glVertex3f(0.0f, -0.5f, -10.0f);
-		glEnd();//end
 
-		//present scene
-		SwapBuffers(dc);
+
+		glEnd();//结束三角形的绘制
+
+
+		SwapBuffers(dc);//交换前后缓冲区
 	}
 
 	return 0;
